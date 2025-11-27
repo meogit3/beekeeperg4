@@ -1,0 +1,83 @@
+name: 24/7 Browser Keeper - Shift 4
+on:
+  schedule:
+    - cron: '0 18 * * *' # Starts at 6 PM
+  workflow_dispatch:      # Manual start
+
+jobs:
+  puppeteer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355  # 5 hours 55 minutes
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install Puppeteer
+      run: npm install puppeteer
+      
+    - name: Create and run browser script
+      run: |
+        cat > keepalive.js << 'EOF'
+        const puppeteer = require('puppeteer');
+        
+        console.log('🚀 Starting Puppeteer session...');
+        
+        async function runBrowser() {
+          const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
+          
+          const page = await browser.newPage();
+          console.log('🦊 Browser opened successfully');
+          
+          // Set a 5 hour 50 minute timer (safe margin)
+          const startTime = Date.now();
+          const maxTime = 5 * 60 * 60 * 1000 + 50 * 60 * 1000;
+          
+          while (Date.now() - startTime < maxTime) {
+            try {
+              console.log('🌐 Loading your website...');
+              
+              // GO TO YOUR WEBSITE - CHANGE THIS URL!
+              await page.goto('https://shooo.top/starvuxx', {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+              });
+              
+              console.log('✅ Page loaded: ' + new Date().toLocaleTimeString());
+              
+              // Simulate human behavior
+              await page.waitForTimeout(5000);
+              
+              // Scroll randomly
+              await page.evaluate(() => {
+                window.scrollTo(0, Math.random() * 1000);
+              });
+              
+              console.log('🖱️  Simulated user activity');
+              
+              // Wait 2-4 minutes before next activity
+              const waitTime = 120000 + Math.random() * 120000;
+              await page.waitForTimeout(waitTime);
+              
+            } catch (error) {
+              console.log('❌ Error:', error.message);
+              await page.waitForTimeout(30000);
+            }
+          }
+          
+          await browser.close();
+          console.log('🕒 Session completed after 6 hours');
+        }
+        
+        runBrowser().catch(console.error);
+        EOF
+        
+        node keepalive.js
