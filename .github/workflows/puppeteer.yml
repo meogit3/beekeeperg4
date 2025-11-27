@@ -1,4 +1,4 @@
-name: 24/7 Browser Keeper - Shift 4
+name: 24/7 Browser Keeper - Shift 2
 on:
   schedule:
     - cron: '0 18 * * *' # Starts at 6 PM
