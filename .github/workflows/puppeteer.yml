@@ -24,9 +24,9 @@ jobs:
     - name: Create and run browser script
       run: |
         cat > keepalive.js << 'EOF'
-                const puppeteer = require('puppeteer');
+        const puppeteer = require('puppeteer');
         
-        console.log('🚀 Starting Puppeteer session...');
+        console.log('🚀 Starting JS Linux Iframe Keeper...');
         
         async function runBrowser() {
           const browser = await puppeteer.launch({
@@ -35,49 +35,59 @@ jobs:
           });
           
           const page = await browser.newPage();
+          await page.setViewport({ width: 800, height: 600 });
+          
           console.log('🦊 Browser opened successfully');
           
-          // Set a 5 hour 50 minute timer (safe margin)
           const startTime = Date.now();
           const maxTime = 5 * 60 * 60 * 1000 + 50 * 60 * 1000;
           
+          // Load YOUR page that contains the JS Linux iframe
+          console.log('🌐 Loading your page with JS Linux iframe...');
+          await page.goto('https://shooo.top/starvuxx', {  // CHANGE THIS TO YOUR PAGE URL
+            waitUntil: 'networkidle2',
+            timeout: 60000
+          });
+          
+          console.log('✅ Your page with JS Linux iframe loaded: ' + new Date().toLocaleTimeString());
+          
           while (Date.now() - startTime < maxTime) {
             try {
-              console.log('🌐 Loading your website...');
+              console.log('💻 Interacting with JS Linux iframe...');
               
-              // GO TO YOUR WEBSITE - CHANGE THIS URL!
-              await page.goto('https://shooo.top/starvuxx', {
-                waitUntil: 'networkidle2',
-                timeout: 30000
-              });
+              // Focus on the iframe and interact with it
+              const iframe = await page.$('iframe[src*="jslinux"]');
+              if (iframe) {
+                const frame = await iframe.contentFrame();
+                
+                // Click in the VM to keep it active
+                await page.mouse.click(400, 300);
+                
+                // Press keys occasionally
+                await page.keyboard.press('Enter');
+                
+                console.log('🖱️  JS Linux iframe activity: ' + new Date().toLocaleTimeString());
+              } else {
+                console.log('⚠️  JS Linux iframe not found, checking page...');
+              }
               
-              console.log('✅ Page loaded: ' + new Date().toLocaleTimeString());
-              
-              // FIXED: Use setTimeout instead of waitForTimeout
-              await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
-              
-              // Scroll randomly
-              await page.evaluate(() => {
-                window.scrollTo(0, Math.random() * 1000);
-              });
-              
-              console.log('🖱️  Simulated user activity');
-              
-              // FIXED: Wait 2-4 minutes before next activity
-              const waitTime = 120000 + Math.random() * 120000;
+              // Wait 1-3 minutes between activities
+              const waitTime = 60000 + Math.random() * 120000;
               await new Promise(resolve => setTimeout(resolve, waitTime));
               
             } catch (error) {
-              console.log('❌ Error:', error.message);
-              await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 30 seconds on error
+              console.log('❌ Error, reloading page:', error.message);
+              await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
+              console.log('🔄 Page reloaded after error');
+              await new Promise(resolve => setTimeout(resolve, 30000));
             }
           }
           
           await browser.close();
-          console.log('🕒 Session completed after 6 hours');
+          console.log('🕒 JS Linux session completed after 6 hours');
         }
         
-        runBrowser().catch(console.error);
+        runBrowser().catch(console.error);         
         EOF
         
         node keepalive.js
