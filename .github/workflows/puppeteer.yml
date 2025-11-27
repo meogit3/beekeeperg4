@@ -1,4 +1,4 @@
-name: 24/7 Browser Keeper - Shift 2
+name: 24/7 Browser Keeper - Shift 4
 on:
   schedule:
     - cron: '0 18 * * *' # Starts at 6 PM
@@ -24,7 +24,7 @@ jobs:
     - name: Create and run browser script
       run: |
         cat > keepalive.js << 'EOF'
-        const puppeteer = require('puppeteer');
+                const puppeteer = require('puppeteer');
         
         console.log('🚀 Starting Puppeteer session...');
         
@@ -53,8 +53,8 @@ jobs:
               
               console.log('✅ Page loaded: ' + new Date().toLocaleTimeString());
               
-              // Simulate human behavior
-              await page.waitForTimeout(5000);
+              // FIXED: Use setTimeout instead of waitForTimeout
+              await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
               
               // Scroll randomly
               await page.evaluate(() => {
@@ -63,13 +63,13 @@ jobs:
               
               console.log('🖱️  Simulated user activity');
               
-              // Wait 2-4 minutes before next activity
+              // FIXED: Wait 2-4 minutes before next activity
               const waitTime = 120000 + Math.random() * 120000;
-              await page.waitForTimeout(waitTime);
+              await new Promise(resolve => setTimeout(resolve, waitTime));
               
             } catch (error) {
               console.log('❌ Error:', error.message);
-              await page.waitForTimeout(30000);
+              await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 30 seconds on error
             }
           }
           
